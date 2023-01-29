@@ -6,12 +6,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 
 import com.example.tarefasemlista.R;
 import com.example.tarefasemlista.adapter.TarefaAdapter;
+import com.example.tarefasemlista.helper.DbHelper;
+import com.example.tarefasemlista.helper.RecyclerItemClickListener;
+import com.example.tarefasemlista.helper.TarefaDAO;
 import com.example.tarefasemlista.model.Tarefa;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -33,7 +39,42 @@ public class MainActivity extends AppCompatActivity {
         //setSupportActionBar(toolbar);
 
         FloatingActionButton BotaoSalvar = findViewById(R.id.BotaoSalvar);
+
+        //Configurar recycler
         recyclerView = findViewById(R.id.recyclerView);
+
+        //Para teste de versao.
+/*
+        DbHelper db = new DbHelper( getApplicationContext() );
+
+        ContentValues cv = new ContentValues();
+        cv.put("nome", "Teste");
+
+        db.getWritableDatabase().insert("tarefas", null, cv);
+*/
+        //Adicionar evento de clique
+        recyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(
+                        getApplicationContext(),
+                        recyclerView,
+                        new RecyclerItemClickListener.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(View view, int position) {
+                                Log.i("clique", "Edicao do texto, no Recycler");
+                            }
+
+                            @Override
+                            public void onLongItemClick(View view, int position) {
+                                Log.i("clique", "Delecao do texto, no Recycler");
+                            }
+
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                            }
+                        }
+                )
+        );
 
         BotaoSalvar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -51,15 +92,10 @@ public class MainActivity extends AppCompatActivity {
     public void carregarListaTarefas(){
 
         // Listar Tarefas do Banco de dados, mais primeiro irei listar de forma istatica
-        Tarefa tarefa1 = new Tarefa();
-        tarefa1.setNomeTarefa("Ir ao Mercado");
-        listaTarefas.add( tarefa1 );
+        TarefaDAO tarefaDAO = new TarefaDAO(getApplicationContext() );
+        listaTarefas = tarefaDAO.lista();
 
-        Tarefa tarefa2 = new Tarefa();
-        tarefa2.setNomeTarefa("Ir a feira");
-        listaTarefas.add( tarefa2 );
-
-        //Evibe a lista de tarefas no RecycleView
+        //Exibe a lista de tarefas no RecycleView
 
 
         // Configurar o Adapter
@@ -70,7 +106,13 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager( layoutManager );
         recyclerView.setHasFixedSize(true);
         recyclerView.addItemDecoration(new DividerItemDecoration(getApplicationContext(), LinearLayoutManager.VERTICAL));
-        //recyclerView.setAdapter(  );
+        recyclerView.setAdapter( tarefaAdapter );
 
+    }
+
+    @Override
+    protected void onStart() {
+        carregarListaTarefas();
+        super.onStart();
     }
 }
