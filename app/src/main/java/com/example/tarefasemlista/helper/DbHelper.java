@@ -13,15 +13,14 @@ public class DbHelper extends SQLiteOpenHelper {
     public static String NOME_DB = "DB_TAREFAS";
     public static String TABELA_TAREFAS = "tarefas";
 
-    public DbHelper(@Nullable Context context) {
+    public DbHelper( Context context) {
         super(context, NOME_DB, null, VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
 
-        String sql = "CREATE TABLE IF NOT EXISTS " + TABELA_TAREFAS
-                + " (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+        String sql = "CREATE TABLE IF NOT EXISTS " + TABELA_TAREFAS + " (id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 " nome TEXT NOT NULL ); ";
 
         try {

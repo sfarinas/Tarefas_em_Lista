@@ -31,4 +31,6 @@ public class Tarefa implements Serializable {
     public void setCauculoTotal(Double cauculoTotal) {
         this.cauculoTotal = cauculoTotal;
     }
+
+
 }

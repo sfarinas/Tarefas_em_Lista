@@ -1,5 +1,6 @@
 package com.example.tarefasemlista.activity;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -7,11 +8,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Toast;
 
 import com.example.tarefasemlista.R;
 import com.example.tarefasemlista.adapter.TarefaAdapter;
@@ -30,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private TarefaAdapter tarefaAdapter;
     private List<Tarefa> listaTarefas = new ArrayList<>();
+    private Tarefa tarefaSelecionada;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,16 +47,6 @@ public class MainActivity extends AppCompatActivity {
         //Configurar recycler
         recyclerView = findViewById(R.id.recyclerView);
 
-        //Para teste de versao.
-/*
-        DbHelper db = new DbHelper( getApplicationContext() );
-
-        ContentValues cv = new ContentValues();
-        cv.put("nome", "Teste");
-
-        db.getWritableDatabase().insert("tarefas", null, cv);
-*/
-        //Adicionar evento de clique
         recyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(
                         getApplicationContext(),
@@ -60,11 +54,54 @@ public class MainActivity extends AppCompatActivity {
                         new RecyclerItemClickListener.OnItemClickListener() {
                             @Override
                             public void onItemClick(View view, int position) {
-                                Log.i("clique", "Edicao do texto, no Recycler");
+                                // Recuperar a tarefa para edicao.
+                                Tarefa tarefaSelecionada = listaTarefas.get( position );
+
+                                // Enviar tarefa para tela adicionar tarefa
+                                Intent intent = new Intent(MainActivity.this, AdicionarTarefaActivity.class);
+                                intent.putExtra("tarefaSelecionada", tarefaSelecionada);
+
+                                startActivity( intent );
+
+                                //Log.i("clique", "Edicao do texto, no Recycler");
                             }
 
                             @Override
                             public void onLongItemClick(View view, int position) {
+
+                                // Recuperar a tarefa para deletar
+                                tarefaSelecionada = listaTarefas.get( position );
+
+                                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+
+                                //Configure titulo e mensagem
+                                dialog.setTitle("Confirmar exclusão");
+                                dialog.setMessage("Deseja Realmente Excluir a tarefa: " + tarefaSelecionada.getNomeTarefa() + "?" );
+
+                                // SIM
+                                dialog.setPositiveButton("SIM", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                        TarefaDAO tarefaDAO = new TarefaDAO( getApplicationContext() );
+                                        if ( tarefaDAO.deletar(tarefaSelecionada) ){
+
+                                            carregarListaTarefas();
+                                            Toast.makeText(getApplicationContext(), "Sucesso ao Excluir tarefa !",Toast.LENGTH_SHORT).show();
+                                        }else {
+                                            Toast.makeText(getApplicationContext(), "Erro ao Excluir tarefa !",Toast.LENGTH_SHORT).show();
+                                        }
+
+                                    }
+                                });
+
+                                // NAO
+                                dialog.setNegativeButton("NAO", null);
+
+                                //Exibir nossa Dialog
+                                dialog.create();
+                                dialog.show();
+
                                 Log.i("clique", "Delecao do texto, no Recycler");
                             }
 

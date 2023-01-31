@@ -42,12 +42,35 @@ public class TarefaDAO implements ITarefaDAO {
 
     @Override
     public boolean atualizar(Tarefa tarefa) {
-        return false;
+
+        ContentValues cv = new ContentValues();
+        cv.put( "nome", tarefa.getNomeTarefa() );
+
+        try {
+            String[] args = { tarefa.getId().toString() };
+            escreve.update(DbHelper.TABELA_TAREFAS, cv, "id=?", args );
+            Log.e("INFO", "Tarefa Atualizada com Sucesso "  );
+        }catch (Exception e){
+            Log.e("INFO", "Erro ao Atualizar tarefa " + e.getMessage() );
+            return false;
+        }
+
+        return true;
     }
 
     @Override
     public boolean deletar(Tarefa tarefa) {
-        return false;
+
+        try {
+            String[] args = { tarefa.getId().toString() };
+            escreve.delete(DbHelper.TABELA_TAREFAS, "id=?", args );
+            Log.e("INFO", "Tarefa Atualizada com Sucesso "  );
+        }catch (Exception e){
+            Log.e("INFO", "Erro ao Atualizar tarefa " + e.getMessage() );
+            return false;
+        }
+
+        return true;
     }
 
     @Override
@@ -58,16 +81,21 @@ public class TarefaDAO implements ITarefaDAO {
         String sql = "SELECT * FROM " + DbHelper.TABELA_TAREFAS + " ;";
         Cursor c = le.rawQuery(sql, null);
 
+        int indice = c.getColumnIndex("id");
+        int indiceNome = c.getColumnIndex("nome");
+
         while ( c.moveToNext() ){
 
             Tarefa tarefa = new Tarefa();
 
             //    REVISAAAR        ****************************************************
-            Long id = c.getLong( c.getColumnIndex("id") );
-            String nomeTarefa = c.getString( c.getColumnIndex("nomeTarefa") );
+            Long id = c.getLong( indice );
+            String nomeTarefa = c.getString( indiceNome );
 
             tarefa.setId( id );
             tarefa.setNomeTarefa( nomeTarefa );
+
+            tarefas.add( tarefa );
 
         }
 
